@@ -33,7 +33,7 @@ function loadPack(packId = null){
   if(packId === null){
     Object.keys(packs).map((pid) => {
       const _pack = packs[pid];
-      if(_pack.id == current_pack.id){
+      if(_pack.pack_id == current_pack.pack_id){
         packId = pid;
       }
     })
@@ -70,6 +70,19 @@ function loadPack(packId = null){
           audio.once('load', function(){
             loaded_sounds[kc] = audio;
             check();
+          })
+          audio.once("loaderror", function(id,code){
+            // 1 aborted
+            // 2 network
+            // 3 decode
+            // 4 unsupported
+            error = true;
+            loaded_sounds[kc] = code;
+            console.log(kc, code);
+            reject(code);
+          })
+          audio.once("playerror", function(a,b,c){
+            console.log("playerror", a,b,c);
           })
         })
       }
@@ -246,10 +259,6 @@ function packsToOptions(packs, pack_list) {
     for (let pack of group.packs) {
       // check if selected
       const is_selected = selected_pack_id == pack.pack_id;
-      if (is_selected) {
-        // pack current pack to saved pack
-        setPack(pack.pack_id);
-      }
       // add pack to pack list
       const opt = document.createElement('option');
       opt.text = pack.name;
