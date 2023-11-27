@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, Tray, Menu, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, Tray, Menu, shell, ipcMain, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs-extra');
 const Store = require("electron-store");
@@ -13,6 +13,9 @@ const home_dir = app.getPath('home');
 const user_dir = app.getPath("userData");
 const custom_dir = path.join(home_dir, '/mechvibes_custom');
 const current_pack_store_id = 'mechvibes-pack';
+
+const systemColor = systemPreferences.getAccentColor();
+console.log(systemColor);
 
 const os = require("os");
 const log = require("electron-log");

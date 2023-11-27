@@ -1,6 +1,12 @@
+:root {
+  --theme-color: #ff5050;
+  --checkbox-color: #ff5050;
+  --checkbox-background: #fff;
+}
+
 a,
 a:hover {
-  color: #ff5050;
+  color: var(--theme-color);
 }
 
 a:hover {
@@ -16,7 +22,7 @@ a:hover {
 #logo {
   font-family: sans-serif;
   transition: all 0.1s ease;
-  box-shadow: 0 2px #ff6666;
+  box-shadow: 0 2px var(--theme-color);
   font-size: 3rem;
   font-weight: 600;
   background: #fff;
@@ -86,7 +92,7 @@ a:hover {
   /* Set a specific slider handle width */
   height: 20px;
   /* Slider handle height */
-  background: #ff5050;
+  background: var(--theme-color);
   /* Green background */
   cursor: pointer;
   /* Cursor on hover */
@@ -98,7 +104,7 @@ a:hover {
   /* Set a specific slider handle width */
   height: 20px;
   /* Slider handle height */
-  background: #ff5050;
+  background: var(--theme-color);
   /* Green background */
   cursor: pointer;
   /* Cursor on hover */
@@ -111,11 +117,6 @@ table tr td {
 
 table {
   margin-bottom: 0;
-}
-
-:root {
-  --checkbox-color: #ff5050;
-  --checkbox-background: #fff;
 }
 
 .checkbox{
@@ -153,7 +154,7 @@ table {
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
   opacity:0;
   transition: 200ms opacity ease-in-out;
-  box-shadow: inset 1em 1em var(--checkbox-color);
+  box-shadow: inset 1em 1em var(--theme-color);
   /* Windows High Contrast Mode */
   background-color: CanvasText;
 }
@@ -212,4 +213,10 @@ table {
   height:100%;
   background-color: #ff6666;
   transition: width 0.6s ease;
+}
+
+select:focus{
+  color: var(--theme-color);
+  border-color:var(--theme-color);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 8" width="30"><path fill="%23d1d1d1" d="M0,0l6,8l6-8"/></svg>');
 }
