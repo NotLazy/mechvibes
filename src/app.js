@@ -56,6 +56,8 @@ function loadPack(packId = null){
   });
 }
 
+let KeepAlive = null;
+
 function _loadPack(packId){
   return new Promise((resolve, reject) => {
     if(packs[packId] !== undefined){
@@ -91,11 +93,9 @@ function _loadPack(packId){
               console.log(path);
               if(!fs.existsSync(path)){
                 missing = true;
-                log(`loader ${kc} missing, ${path}`);
               }
             })
           }else{
-            log(`loader ${kc} undefined`);
             missing = true;
           }
           if(missing){
@@ -103,7 +103,9 @@ function _loadPack(packId){
             check();
             return;
           }
-          log(`loader ${kc} true`);
+          if(KeepAlive === null){
+            KeepAlive = new Howl({...pack.sound_data[kc], loop: true, volume: 0, autoplay: true});
+          }
           const audio = new Howl(pack.sound_data[kc]);
           loaded_sounds[kc] = false;
           audio.once('load', function(){
