@@ -29,6 +29,10 @@ let is_muted = store.get('mechvibes-muted') || false;
 const packs = [];
 const all_sound_files = {};
 
+function log(message){
+  ipcRenderer.send("log", message);
+}
+
 function loadPack(packId = null){
   if(packId === null){
     Object.keys(packs).map((pid) => {
@@ -38,6 +42,21 @@ function loadPack(packId = null){
       }
     })
   }
+
+  const app_logo = document.getElementById('logo');
+  const app_body = document.getElementById('app-body');
+
+  log(`Loading ${packId}`)
+  _loadPack(packId).then(() => {
+    log("loaded");
+    app_logo.innerHTML = 'Mechvibes';
+    app_body.classList.remove('loading');  
+  }).catch(() => {
+    app_logo.innerHTML = 'Failed';
+  });
+}
+
+function _loadPack(packId){
   return new Promise((resolve, reject) => {
     if(packs[packId] !== undefined){
       unloadAllPacks(); // unload all loaded packs before attempting to load a new pack.
@@ -65,6 +84,23 @@ function loadPack(packId = null){
           }
         }
         Object.keys(pack.sound_data).map((kc) => {
+          let missing = false;
+          if(pack.sound_data[kc] !== undefined){
+            Object.keys(pack.sound_data[kc].src).map((i) => {
+              const path = pack.sound_data[kc].src[i];
+              console.log(path);
+              if(!fs.existsSync(path)){
+                missing = true;
+              }
+            })
+          }else{
+            missing = true;
+          }
+          if(missing){
+            // reject(5);
+            check();
+            return;
+          }
           const audio = new Howl(pack.sound_data[kc]);
           loaded_sounds[kc] = false;
           audio.once('load', function(){
@@ -159,6 +195,9 @@ async function loadPacks() {
       if (key_define_type == 'single') {
         // define sound path
         const sound_path = `${folder}${sound}`;
+        if(!fs.existsSync(sound_path)){
+          return;
+        }
         const sound_data = { src: [sound_path], sprite: keycodesRemap(defines) };
         Object.assign(pack_data, { sound_data: sound_data });
       } else {
@@ -167,6 +206,9 @@ async function loadPacks() {
           if (defines[kc]) {
             // define sound path
             const sound_path = `${folder}${defines[kc]}`;
+            if(!fs.existsSync(sound_path)){
+              return;
+            }
             sound_data[kc] = { src: [sound_path] };
           }
         });
@@ -325,10 +367,7 @@ function packsToOptions(packs, pack_list) {
 
     // get last selected pack
     current_pack = getSavedPack();
-    loadPack().then(() => {
-      app_logo.innerHTML = 'Mechvibes';
-      app_body.classList.remove('loading');
-    });
+    loadPack()
 
     // handle tray hiding
     console.log(store.get(MV_TRAY_LSID));
@@ -376,19 +415,31 @@ function packsToOptions(packs, pack_list) {
       }
     });
 
+    // store pressed state of multiple keys
+    let pressed_keys = {};
+
     // if key released, clear current key
-    iohook.on('keyup', () => {
-      current_key_down = null;
-      app_logo.classList.remove('pressed');
+    iohook.on('keyup', ({ keycode }) => {
+      // current_key_down = null;
+      let holding = false;
+      pressed_keys[`${keycode}`] = false;
+      for (const key in pressed_keys) {
+        if(pressed_keys[key]){
+          holding = true;
+        }
+      }
+      if(!holding){
+        app_logo.classList.remove('pressed');
+      }
     });
 
     // key pressed, pack current key and play sound
     iohook.on('keydown', ({ keycode }) => {
-      // if hold down a key, not repeat the sound
-      // On macOS this doesn't seem to be an issue?
-      if (current_key_down != null && current_key_down == keycode) {
+      // if hold down a key, don't repeat the sound
+      if(pressed_keys[`${keycode}`] !== undefined && pressed_keys[`${keycode}`]){
         return;
       }
+      pressed_keys[`${keycode}`] = true;
 
       // display current pressed key
       // app_logo.innerHTML = keycode;
