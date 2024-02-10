@@ -59,6 +59,11 @@ function loadPack(packId = null){
 function _loadPack(packId){
   return new Promise((resolve, reject) => {
     if(packs[packId] !== undefined){
+      // if sound is already loaded, we can stop here
+      if(packs[packId].sound !== undefined){
+        resolve();
+        return;
+      }
       unloadAllPacks(); // unload all loaded packs before attempting to load a new pack.
       const pack = packs[packId];
       if(pack.key_define_type == 'single'){
